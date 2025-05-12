@@ -43,3 +43,4 @@ class GUIManager:
 
     def run(self):
         self.window.mainloop()
+w
