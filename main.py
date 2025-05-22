@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from api_handler import APIClient
 from user_profile import UserProfile
+import requests
 
 def chat_loop(api):
     print("Chatbot started! Type 'exit' to quit.")

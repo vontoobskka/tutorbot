@@ -1,26 +1,14 @@
-# api_handler.py
-import requests
+import google.generativeai as genai
+
 
 class APIClient:
-    def __init__(self, api_key="YOUR_API_KEY_HERE"):
-        self.api_key = api_key
-        self.url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent"
-        self.headers = {
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {self.api_key}"
-        }
+    def __init__(self, api_key):
+        genai.configure(api_key=api_key)
+        self.model = genai.GenerativeModel("gemini-1.5-flash")
 
-    def get_response(self, prompt):
-        data = {
-            "contents": [
-                {"parts": [{"text": prompt}]}
-            ]
-        }
-
+    def get_response(self, user_input):
         try:
-            response = requests.post(self.url, headers=self.headers, json=data)
-            response.raise_for_status()
-            content = response.json()
-            return content['candidates'][0]['content']['parts'][0]['text']
+            response = self.model.generate_content(user_input)
+            return response.text
         except Exception as e:
             return f"Error contacting AI: {e}"
