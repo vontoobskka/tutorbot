@@ -1,45 +1,68 @@
-# gui.py
 import tkinter as tk
-from tkinter import scrolledtext
+from tkinter import ttk, filedialog, messagebox
 
 class GUIManager:
     def __init__(self, api_client, user):
         self.api_client = api_client
         self.user = user
+        self.root = tk.Tk()
+        self.root.title("Tutor Bot - Homework Helper")
+        self.root.geometry("600x500")
+        self.root.config(bg="#282c34")  # dark background color
 
-        self.window = tk.Tk()
-        self.window.title("TutorBot - Powered by Gemini")
-        self.window.geometry("600x500")
+        self._setup_widgets()
 
-        # Chat display area
-        self.chat_area = scrolledtext.ScrolledText(self.window, wrap=tk.WORD, state='disabled')
-        self.chat_area.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
+    def _setup_widgets(self):
+        # Dropdown for subjects
+        self.subject_var = tk.StringVar()
+        subjects = ["Math", "Science", "English", "History"]
+        self.subject_dropdown = ttk.Combobox(self.root, textvariable=self.subject_var, values=subjects)
+        self.subject_dropdown.current(0)
+        self.subject_dropdown.pack(pady=10)
 
-        # User input field
-        self.user_input = tk.Entry(self.window, font=("Arial", 12))
-        self.user_input.pack(padx=10, pady=(0,10), fill=tk.X)
-        self.user_input.bind("<Return>", self.send_message)
+        # Button to upload image
+        self.upload_button = tk.Button(self.root, text="Upload Homework Image", command=self._upload_image)
+        self.upload_button.pack(pady=10)
 
-        # Send button
-        self.send_button = tk.Button(self.window, text="Send", command=self.send_message)
-        self.send_button.pack(pady=(0, 10))
+        # Textbox for user input
+        self.user_input = tk.Entry(self.root, font=("Arial", 14))
+        self.user_input.pack(fill='x', padx=20, pady=10)
+        self.user_input.bind("<Return>", self._on_enter_pressed)
 
-    def send_message(self, event=None):
-        user_msg = self.user_input.get().strip()
-        if user_msg == "":
+        # Text widget for bot response
+        self.response_area = tk.Text(self.root, height=15, bg="#1e2228", fg="white", font=("Arial", 12))
+        self.response_area.pack(fill='both', padx=20, pady=10, expand=True)
+        self.response_area.config(state=tk.DISABLED)
+
+    def _upload_image(self):
+        filename = filedialog.askopenfilename(
+            title="Select Homework Image",
+            filetypes=[("Image files", "*.png *.jpg *.jpeg *.bmp")]
+        )
+        if filename:
+            messagebox.showinfo("Image Selected", f"Image file selected:\n{filename}")
+            # TODO: Add image analysis call here using API
+
+    def _on_enter_pressed(self, event):
+        question = self.user_input.get().strip()
+        if not question:
             return
-
-        self.display_message(f"You: {user_msg}")
         self.user_input.delete(0, tk.END)
 
-        bot_reply = self.api_client.get_response(user_msg)
-        self.display_message(f"TutorBot: {bot_reply}")
+        # Show user question in response area
+        self._append_text(f"You: {question}\n")
 
-    def display_message(self, message):
-        self.chat_area.config(state='normal')
-        self.chat_area.insert(tk.END, message + "\n\n")
-        self.chat_area.config(state='disabled')
-        self.chat_area.see(tk.END)
+        # Call your API client to get a response (async recommended but sync for now)
+        response = self.api_client.get_response(question)
+
+        # Show bot response
+        self._append_text(f"Bot: {response}\n\n")
+
+    def _append_text(self, text):
+        self.response_area.config(state=tk.NORMAL)
+        self.response_area.insert(tk.END, text)
+        self.response_area.see(tk.END)
+        self.response_area.config(state=tk.DISABLED)
 
     def run(self):
-        self.window.mainloop()
+        self.root.mainloop()
