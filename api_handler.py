@@ -1,28 +1,14 @@
 import google.generativeai as genai
 
+
 class APIClient:
-    def __init__(self, api_key: str):
+    def __init__(self, api_key):
         genai.configure(api_key=api_key)
         self.model = genai.GenerativeModel("gemini-1.5-flash")
-        self.chat = self.model.start_chat(history=[])
 
-    def get_response(self, text=None, image_bytes=None):
+    def get_response(self, user_input):
         try:
-            if image_bytes and text:
-                response = self.chat.send_message([
-                    text,
-                    {"mime_type": "image/jpeg", "data": image_bytes}
-                ])
-            elif image_bytes:
-                response = self.chat.send_message({
-                    "mime_type": "image/jpeg",
-                    "data": image_bytes
-                })
-            elif text:
-                response = self.chat.send_message(text)
-            else:
-                return "No input provided."
-
+            response = self.model.generate_content(user_input)
             return response.text
         except Exception as e:
-            return f"Bot Error: {str(e)}"
+            return f"Error contacting AI: {e}"

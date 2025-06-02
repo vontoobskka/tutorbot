@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 from api_handler import APIClient
 from user_profile import UserProfile
-from gui import GUIManager  # Make sure this exists
+from gui import TutorBotGUI 
 from tkinter import ttk, filedialog
 
 # Optional: fallback console chat mode
@@ -34,7 +34,7 @@ def main():
     api = APIClient(api_key)
 
     # ✅ Launch GUI instead of console
-    app = GUIManager(api_client=api, user=user)
+    app = TutorBotGUI(api_client=api, user=user)
     app.run()
 
     # If you ever want to run console mode instead, just use:
